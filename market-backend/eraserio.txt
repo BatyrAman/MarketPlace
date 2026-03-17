@@ -1,0 +1,85 @@
+users [icon: user] {
+  id uuid pk
+  email string unique
+  username string unique
+  password_hash string
+  full_name string nullable
+  role enum(customer,seller,admin)
+  is_active boolean
+  created_at datetime
+}
+
+categories [icon: folder] {
+  id uuid pk
+  name string unique
+  description string nullable
+}
+
+products [icon: box] {
+  id uuid pk
+  name string
+  description string nullable
+  price decimal(10,2)
+  stock int
+  is_active boolean
+  seller_id uuid fk
+  category_id uuid fk
+  created_at datetime
+}
+
+carts [icon: shopping-cart] {
+  id uuid pk
+  user_id uuid fk unique
+}
+
+cart_items [icon: list] {
+  id uuid pk
+  cart_id uuid fk
+  product_id uuid fk
+  quantity int
+}
+
+orders [icon: receipt] {
+  id uuid pk
+  user_id uuid fk
+  total_amount decimal(12,2)
+  status enum(pending,paid,cancelled,delivered)
+  created_at datetime
+}
+
+order_items [icon: package] {
+  id uuid pk
+  order_id uuid fk
+  product_id uuid fk
+  quantity int
+  price_at_purchase decimal(10,2)
+}
+
+reviews [icon: star] {
+  id uuid pk
+  user_id uuid fk
+  product_id uuid fk
+  rating int
+  comment string nullable
+  created_at datetime
+}
+
+refresh_tokens [icon: key] {
+  id uuid pk
+  user_id uuid fk
+  token string unique
+  expires_at datetime
+  created_at datetime
+}
+
+users.id > products.seller_id
+categories.id > products.category_id
+users.id - carts.user_id
+carts.id > cart_items.cart_id
+products.id > cart_items.product_id
+users.id > orders.user_id
+orders.id > order_items.order_id
+products.id > order_items.product_id
+users.id > reviews.user_id
+products.id > reviews.product_id
+users.id > refresh_tokens.user_id
