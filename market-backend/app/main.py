@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -33,19 +34,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+cors_origins = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost,http://127.0.0.1,http://localhost:5173,http://127.0.0.1:5173"
+)
+
+origins = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_exception_handler(AppException, app_exception_handler)
-
-
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_, exc: RequestValidationError):
     return JSONResponse(
